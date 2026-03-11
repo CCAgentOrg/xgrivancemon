@@ -1,30 +1,28 @@
-"""Configuration management for XGrivanceMon"""
+"""Configuration settings using Pydantic"""
+from pydantic import Field
 from pydantic_settings import BaseSettings
-from functools import lru_cache
+from typing import List, Optional
 
 class Settings(BaseSettings):
-    # API Keys
-    x_api_key: str = ""
-    x_api_secret: str = ""
+    # TursoDB Configuration
+    turso_database_url: str = Field(default="libsql://xgrivancemon.turso.io")
+    turso_auth_token: str = Field(default="")
     
-    # Database
-    turso_url: str = ""
-    turso_token: str = ""
+    # X Cookie-Based Authentication (NOT API)
+    x_auth_token: str = Field(default="", description="X auth_token cookie from browser session")
+    x_csrf_token: str = Field(default="", description="X ct0 cookie (CSRF token)")
     
-    # Scheduling
-    collection_hour: int = 8
-    collection_minute: int = 0
-    report_day: str = "sun"  # Sunday
-    report_hour: int = 10
+    # Collection Settings
+    default_collection_window_hours: int = Field(default=168)  # 7 days
+    rate_limit_delay_seconds: int = Field(default=60)
+    max_requests_per_session: int = Field(default=100)
     
-    # App Settings
-    debug: bool = False
-    log_level: str = "INFO"
+    # Application Settings
+    app_name: str = Field(default="XGrivanceMon")
+    debug: bool = Field(default=False)
     
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
 
-@lru_cache()
-def get_settings() -> Settings:
-    return Settings()
+settings = Settings()
