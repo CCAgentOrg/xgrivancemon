@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XGrivanceMon Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-6">
+    <h1 class="text-3xl font-bold mb-6 text-blue-400">Transport Grievance Monitor</h1>
+    <div id="stats" class="grid grid-cols-4 gap-4 mb-6">
+        <div class="bg-gray-800 p-4 rounded"><h3>Total Agents</h3><p id="total-agents">-</p></div>
+        <div class="bg-gray-800 p-4 rounded"><h3>Today Runs</h3><p id="today-runs">-</p></div>
+        <div class="bg-gray-800 p-4 rounded"><h3>Complaints 24h</h3><p id="complaints-24h">-</p></div>
+        <div class="bg-gray-800 p-4 rounded"><h3>Avg Response</h3><p id="avg-response">-</p></div>
+    </div>
+    <div id="runs"></div>
+    <script src="dashboard.js"></script>
+</body>
+</html>
