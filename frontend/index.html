@@ -1,19 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>XGrivanceMon Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XGrivanceMon Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%); padding: 1.5rem 2rem; border-bottom: 1px solid #334155; }
+    header h1 { font-size: 1.75rem; font-weight: 700; }
+    header p { color: #94a3b8; margin-top: 0.25rem; }
+    main { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem; }
+    .stat-card h3 { color: #94a3b8; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-value { font-size: 2.5rem; font-weight: 700; color: #60a5fa; margin-top: 0.5rem; }
+    .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; overflow: hidden; }
+    .panel-header { background: #0f172a; padding: 1rem 1.5rem; border-bottom: 1px solid #334155; font-weight: 600; }
+    .panel-content { padding: 1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: #94a3b8; font-weight: 500; }
+    .badge { padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .badge.success { background: #064e3b; color: #34d399; }
+    .badge.error { background: #7f1d1d; color: #f87171; }
+    .badge.pending { background: #78350f; color: #fbbf24; }
+    .bar-item { display: flex; align-items: center; padding: 0.5rem 0; gap: 0.75rem; }
+    .bar-label { width: 100px; font-size: 0.875rem; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; }
+    .bar { flex: 1; height: 24px; background: #3b82f6; border-radius: 4px; transition: width 0.3s ease; }
+    .bar-value { width: 40px; text-align: right; font-weight: 600; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
 </head>
-<body class="bg-gray-900 text-white p-6">
-    <h1 class="text-3xl font-bold mb-6 text-blue-400">Transport Grievance Monitor</h1>
-    <div id="stats" class="grid grid-cols-4 gap-4 mb-6">
-        <div class="bg-gray-800 p-4 rounded"><h3>Total Agents</h3><p id="total-agents">-</p></div>
-        <div class="bg-gray-800 p-4 rounded"><h3>Today Runs</h3><p id="today-runs">-</p></div>
-        <div class="bg-gray-800 p-4 rounded"><h3>Complaints 24h</h3><p id="complaints-24h">-</p></div>
-        <div class="bg-gray-800 p-4 rounded"><h3>Avg Response</h3><p id="avg-response">-</p></div>
+<body>
+  <header>
+    <h1>XGrivanceMon Dashboard</h1>
+    <p>Transport Grievance Monitoring System</p>
+  </header>
+  <main>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Active Agents</h3>
+        <div class="stat-value" id="total-agents">-</div>
+      </div>
+      <div class="stat-card">
+        <h3>Runs Today</h3>
+        <div class="stat-value" id="today-runs">-</div>
+      </div>
+      <div class="stat-card">
+        <h3>Complaints (7d)</h3>
+        <div class="stat-value" id="total-complaints">-</div>
+      </div>
+      <div class="stat-card">
+        <h3>Avg Response</h3>
+        <div class="stat-value" id="avg-response">-</div>
+      </div>
     </div>
-    <div id="runs"></div>
-    <script src="dashboard.js"></script>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">Recent Agent Runs</div>
+        <div class="panel-content">
+          <table id="agent-runs">
+            <thead>
+              <tr><th>Agent</th><th>Time</th><th>Duration</th><th>Status</th><th>Found</th></tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="5" style="text-align:center;color:#64748b;padding:2rem;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Complaints by Authority</div>
+        <div class="panel-content" id="authority-chart">
+          <p style="text-align:center;color:#64748b;padding:2rem;">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="dashboard.js"></script>
 </body>
 </html>

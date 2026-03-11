@@ -204,3 +204,41 @@ class Database:
             "response_rate": (weekly_responses / weekly_complaints * 100) if weekly_complaints > 0 else 0,
             "timestamp": datetime.now().isoformat()
         }
+
+    async def get_agent_count(self) -> int:
+        """Get total number of unique agents"""
+        result = await self.client.execute(
+            "SELECT COUNT(DISTINCT agent_id) as count FROM agent_runs"
+        )
+        return result.rows[0]["count"] if result.rows else 0
+    
+    async def get_today_agent_runs(self) -> int:
+        """Get count of agent runs today"""
+        result = await self.client.execute(
+            "SELECT COUNT(*) as count FROM agent_runs WHERE DATE(created_at) = DATE('now')"
+        )
+        return result.rows[0]["count"] if result.rows else 0
+    
+    async def get_recent_agent_runs(self, limit: int = 20):
+        """Get recent agent runs with stats"""
+        result = await self.client.execute(
+            """SELECT agent_id, created_at, duration_ms, status, 
+                      complaints_collected, authority_handle
+               FROM agent_runs 
+               ORDER BY created_at DESC 
+               LIMIT ?""",
+            [limit]
+        )
+        return [dict(row) for row in result.rows] if result.rows else []
+    
+    async def get_complaints_by_authority(self):
+        """Get complaint counts grouped by authority"""
+        result = await self.client.execute(
+            """SELECT a.name, COUNT(c.id) as complaint_count
+               FROM authorities a
+               LEFT JOIN complaints c ON a.id = c.authority_id
+               WHERE c.created_at >= date('now', '-7 days')
+               GROUP BY a.id
+               ORDER BY complaint_count DESC"""
+        )
+        return [dict(row) for row in result.rows] if result.rows else []
