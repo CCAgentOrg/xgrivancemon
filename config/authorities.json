@@ -1,0 +1,112 @@
+{
+  "authorities": [
+    {
+      "id": "mtc-chennai",
+      "name": "MTC Chennai",
+      "handle": "MtcChennai",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "type": "bus",
+      "schedule": {"day": "Wednesday", "hour": 9, "minute": 0}
+    },
+    {
+      "id": "best-mumbai",
+      "name": "BEST Mumbai",
+      "handle": "myBESTBus",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "type": "bus",
+      "schedule": {"day": "Monday", "hour": 9, "minute": 0}
+    },
+    {
+      "id": "dtc-delhi",
+      "name": "DTC Delhi",
+      "handle": "dtc_india",
+      "city": "Delhi",
+      "state": "Delhi",
+      "type": "bus",
+      "schedule": {"day": "Friday", "hour": 9, "minute": 0}
+    },
+    {
+      "id": "bmtc-bangalore",
+      "name": "BMTC Bangalore",
+      "handle": "BMTC_BENGALURU",
+      "city": "Bangalore",
+      "state": "Karnataka",
+      "type": "bus",
+      "schedule": {"day": "Tuesday", "hour": 9, "minute": 0}
+    },
+    {
+      "id": "ksrtc-kerala",
+      "name": "KSRTC Kerala",
+      "handle": "KSRTC_Kerala",
+      "city": "Kerala",
+      "state": "Kerala",
+      "type": "bus",
+      "schedule": {"day": "Wednesday", "hour": 9, "minute": 0}
+    },
+    {
+      "id": "upsrtc-up",
+      "name": "UPSRTC Uttar Pradesh",
+      "handle": "UPSRTCHQ",
+      "city": "Uttar Pradesh",
+      "state": "Uttar Pradesh",
+      "type": "bus",
+      "schedule": {"day": "Saturday", "hour": 9, "minute": 0}
+    },
+    {
+      "id": "tgsrtc-telangana",
+      "name": "TGSRTC Telangana",
+      "handle": "TGSRTCHQ",
+      "city": "Telangana",
+      "state": "Telangana",
+      "type": "bus",
+      "schedule": {"day": "Sunday", "hour": 9, "minute": 0}
+    },
+    {
+      "id": "chennai-one",
+      "name": "Chennai ONE",
+      "handle": "Chennai_One",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "type": "mixed",
+      "schedule": {"day": "Monday", "hour": 14, "minute": 0}
+    },
+    {
+      "id": "drm-chennai",
+      "name": "Chennai DRM",
+      "handle": "drmchennai",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "type": "rail",
+      "schedule": {"day": "Wednesday", "hour": 16, "minute": 0}
+    },
+    {
+      "id": "cumta-chennai",
+      "name": "Chennai CUMTA",
+      "handle": "cumtaOfficial",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "type": "mixed",
+      "schedule": {"day": "Thursday", "hour": 17, "minute": 0}
+    },
+    {
+      "id": "cmrl-chennai",
+      "name": "Chennai Metro CMRL",
+      "handle": "cmrlchennai",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "type": "metro",
+      "schedule": {"day": "Tuesday", "hour": 15, "minute": 0}
+    },
+    {
+      "id": "chennai-corp",
+      "name": "Greater Chennai Corporation",
+      "handle": "chennaicorp",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "type": "corporation",
+      "schedule": {"day": "Monday", "hour": 11, "minute": 0}
+    }
+  ]
+}
