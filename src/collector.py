@@ -1,67 +1,85 @@
+"""
+X Grievance Collector - Cookie-based Session Auth
+Uses stored session cookies for X web scraping (not API)
+"""
+
 import requests
+import time
+import json
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 class XCollector:
-    def __init__(self, api_key: str, api_secret: str):
-        self.api_key = api_key
-        self.api_secret = api_secret
-        self.base_url = "https://api.x.com/2"
+    def __init__(self, auth_token: str, csrf_token: str):
+        self.session = requests.Session()
+        self.base_url = "https://x.com/i/api"
+        
+        # Set up session cookies
+        self.session.cookies.set("auth_token", auth_token, domain=".x.com")
+        self.session.headers.update({
+            "X-Csrf-Token": csrf_token,
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+            "Referer": "https://x.com/",
+        })
     
-    def _get_headers(self):
-        return {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-    
-    async def search_complaints(self, to_handle: str, since_hours: int = 24) -> List[Dict]:
-        """Search for complaints mentioning an authority"""
-        # Note: This uses X API v2 recent search
-        # In production, you'd use the full archive search for historical data
-        
-        since_time = datetime.now() - timedelta(hours=since_hours)
-        since_str = since_time.strftime("%Y-%m-%dT%H:%M:%SZ")
-        
-        query = f"to:{to_handle} OR @{to_handle}"
-        
-        url = f"{self.base_url}/tweets/search/recent"
-        params = {
-            "query": query,
-            "start_time": since_str,
-            "tweet.fields": "created_at,author_id,public_metrics,geo",
-            "user.fields": "username,public_metrics",
-            "max_results": 100
-        }
+    def search_tweets(self, query: str, since: str, until: str) -> List[Dict]:
+        """Search tweets using X web interface"""
+        tweets = []
         
         try:
-            response = requests.get(url, headers=self._get_headers(), params=params)
+            search_url = f"{self.base_url}/2/search/adaptive.json"
+            params = {
+                "q": query,
+                "count": 100,
+                "result_type": "recent",
+                "tweet_mode": "extended"
+            }
+            
+            response = self.session.get(search_url, params=params, timeout=30)
+            
             if response.status_code == 200:
                 data = response.json()
-                tweets = data.get("data", [])
+                for tweet in data.get("globalObjects", {}).get("tweets", {}).values():
+                    tweets.append(self._parse_tweet(tweet))
+            
+            elif response.status_code == 429:
+                time.sleep(60)
+                return self.search_tweets(query, since, until)
                 
-                complaints = []
-                for tweet in tweets:
-                    complaint = {
-                        "id": tweet["id"],
-                        "x_post_id": tweet["id"],
-                        "content": tweet["text"],
-                        "author_handle": tweet.get("author_id"),  # Would need to lookup username
-                        "posted_at": tweet["created_at"],
-                        "url": f"https://x.com/i/status/{tweet['id']}",
-                        "authority_id": to_handle
-                    }
-                    complaints.append(complaint)
-                
-                return complaints
-            else:
-                print(f"API Error: {response.status_code} - {response.text}")
-                return []
         except Exception as e:
-            print(f"Error fetching tweets: {e}")
-            return []
+            print(f"Error: {e}")
+        
+        return tweets
     
-    async def get_replies(self, tweet_id: str, authority_handle: str) -> List[Dict]:
-        """Get replies from the authority to a complaint"""
-        # This would check if the authority replied
-        # Implementation depends on X API capabilities
-        return []
+    def _parse_tweet(self, tweet: Dict) -> Dict:
+        return {
+            "id": tweet.get("id_str"),
+            "x_post_id": tweet.get("id_str"),
+            "content": tweet.get("full_text", ""),
+            "posted_at": tweet.get("created_at"),
+            "url": f"https://x.com/i/status/{tweet.get('id_str')}",
+            "reply_count": tweet.get("reply_count", 0),
+            "retweet_count": tweet.get("retweet_count", 0),
+            "like_count": tweet.get("favorite_count", 0),
+        }
+    
+    async def search_complaints(self, to_handle: str, since_hours: int = 168) -> List[Dict]:
+        since_time = datetime.now() - timedelta(hours=since_hours)
+        query = f"to:{to_handle} OR @{to_handle} since:{since_time.strftime('%Y-%m-%d')}"
+        return self.search_tweets(query, "", "")
+    
+    async def search_responses(self, from_handle: str, since_hours: int = 168) -> List[Dict]:
+        since_time = datetime.now() - timedelta(hours=since_hours)
+        query = f"from:{from_handle} since:{since_time.strftime('%Y-%m-%d')}"
+        return self.search_tweets(query, "", "")
+
+async def collect_grievances(auth_token: str, csrf_token: str, authority_handle: str):
+    collector = XCollector(auth_token, csrf_token)
+    complaints = await collector.search_complaints(authority_handle)
+    responses = await collector.search_responses(authority_handle)
+    return {
+        "complaints": complaints,
+        "responses": responses,
+        "authority": authority_handle,
+        "collected_at": datetime.now().isoformat()
+    }
