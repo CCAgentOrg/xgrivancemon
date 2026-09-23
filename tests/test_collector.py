@@ -1,71 +1,82 @@
-"""Tests for X API collector module."""
+"""Tests for the cookie-based X collector module."""
 import pytest
 from unittest.mock import Mock, patch
+
 from src.collector import XCollector
 
 
-class TestXCollector:
-    """Test suite for XCollector class."""
+def make_collector() -> XCollector:
+    return XCollector(auth_token="test_auth", csrf_token="test_csrf")
 
-    def test_init_requires_bearer_token(self):
-        """Collector should require bearer token."""
-        with pytest.raises(ValueError):
-            XCollector(bearer_token="")
 
-    def test_init_stores_token(self):
-        """Collector should store bearer token."""
-        collector = XCollector(bearer_token="test_token")
-        assert collector.bearer_token == "test_token"
+class TestXCollectorInit:
+    def test_init_stores_cookies(self):
+        collector = make_collector()
+        assert collector.session.cookies.get("auth_token", domain=".x.com") == "test_auth"
 
-    @patch("src.collector.requests.get")
-    def test_fetch_complaints_success(self, mock_get):
-        """Should return complaints on successful API call."""
+    def test_init_sets_csrf_header(self):
+        collector = make_collector()
+        assert collector.session.headers["X-Csrf-Token"] == "test_csrf"
+
+
+class TestSearchTweets:
+    @patch("src.collector.requests.Session.get")
+    def test_search_tweets_success(self, mock_get):
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "data": [
-                {"id": "1", "text": "Bus late", "author_id": "user1"}
-            ],
-            "meta": {"newest_id": "1"}
+            "globalObjects": {
+                "tweets": {
+                    "1": {
+                        "id_str": "1",
+                        "full_text": "Bus 26 late by 40 minutes",
+                        "created_at": "Wed Mar 11 08:00:00 +0000 2026",
+                        "reply_count": 2,
+                        "retweet_count": 1,
+                        "favorite_count": 5,
+                    }
+                }
+            }
         }
         mock_get.return_value = mock_response
 
-        collector = XCollector(bearer_token="test")
-        result = collector.fetch_complaints("@MtcChennai", hours=1)
+        collector = make_collector()
+        tweets = collector.search_tweets("to:@MtcChennai", "", "")
 
-        assert len(result) == 1
-        assert result[0]["text"] == "Bus late"
+        assert len(tweets) == 1
+        assert tweets[0]["id"] == "1"
+        assert tweets[0]["content"] == "Bus 26 late by 40 minutes"
+        assert tweets[0]["url"] == "https://x.com/i/status/1"
+        assert tweets[0]["like_count"] == 5
 
-    @patch("src.collector.requests.get")
-    def test_fetch_complaints_api_error(self, mock_get):
-        """Should return empty list on API error."""
+    @patch("src.collector.requests.Session.get")
+    def test_search_tweets_request_error_returns_empty(self, mock_get):
+        mock_get.side_effect = RuntimeError("connection refused")
+
+        collector = make_collector()
+        assert collector.search_tweets("to:@MtcChennai", "", "") == []
+
+    @patch("src.collector.requests.Session.get")
+    def test_search_tweets_non_200_returns_empty(self, mock_get):
         mock_response = Mock()
-        mock_response.status_code = 429
+        mock_response.status_code = 403
         mock_get.return_value = mock_response
 
-        collector = XCollector(bearer_token="test")
-        result = collector.fetch_complaints("@MtcChennai", hours=1)
+        collector = make_collector()
+        assert collector.search_tweets("to:@MtcChennai", "", "") == []
+
+
+class TestAsyncSearch:
+    @patch("src.collector.requests.Session.get")
+    async def test_search_complaints_builds_query(self, mock_get):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"globalObjects": {"tweets": {}}}
+        mock_get.return_value = mock_response
+
+        collector = make_collector()
+        result = await collector.search_complaints("@MtcChennai", since_hours=24)
 
         assert result == []
-
-    def test_extract_route_numbers(self):
-        """Should extract route numbers from text."""
-        collector = XCollector(bearer_token="test")
-        text = "Route 26 and 597A are delayed"
-        routes = collector._extract_routes(text)
-        assert "26" in routes
-        assert "597A" in routes
-
-    def test_categorize_complaint_frequency(self):
-        """Should categorize frequency complaints."""
-        collector = XCollector(bearer_token="test")
-        text = "Bus not coming for 30 minutes"
-        category = collector._categorize(text)
-        assert category == "frequency"
-
-    def test_categorize_complaint_infrastructure(self):
-        """Should categorize infrastructure complaints."""
-        collector = XCollector(bearer_token="test")
-        text = "Bus stop has no shelter"
-        category = collector._categorize(text)
-        assert category == "infrastructure"
+        called_query = mock_get.call_args.kwargs["params"]["q"]
+        assert called_query.startswith("to:@MtcChennai")
