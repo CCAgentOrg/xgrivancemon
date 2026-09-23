@@ -17,7 +17,6 @@ ENV PATH=/root/.local/bin:$PATH
 # Copy application code
 COPY src/ ./src/
 COPY migrations/ ./migrations/
-COPY templates/ ./templates/
 COPY config/ ./config/
 
 # Health check
