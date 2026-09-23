@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     rate_limit_delay_seconds: int = Field(default=60)
     max_requests_per_session: int = Field(default=100)
     
+    # Scheduler Settings
+    collection_hour: int = Field(default=8)
+    report_day: str = Field(default="sun")
+    report_hour: int = Field(default=10)
+    
     # Application Settings
     app_name: str = Field(default="XGrivanceMon")
     debug: bool = Field(default=False)
