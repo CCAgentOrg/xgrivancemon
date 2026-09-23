@@ -1,7 +1,17 @@
+# Runtime
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
 libsql-client==0.3.0
 python-dotenv==1.0.0
 httpx==0.26.0
+pydantic-settings==2.1.0
+apscheduler==3.10.4
+requests==2.31.0
+
+# Dev / CI (kept here so CI installs are single-command and reproducible)
 pytest==8.0.0
-pytest-asyncio==0.23.0
+pytest-asyncio==0.23.6
+pytest-cov==4.1.0
+ruff==0.15.7
+mypy==1.19.1
+types-requests==2.31.0.20240406

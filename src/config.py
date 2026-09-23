@@ -1,7 +1,6 @@
 """Configuration settings using Pydantic"""
 from pydantic import Field
 from pydantic_settings import BaseSettings
-from typing import List, Optional
 
 class Settings(BaseSettings):
     # TursoDB Configuration
@@ -16,6 +15,11 @@ class Settings(BaseSettings):
     default_collection_window_hours: int = Field(default=168)  # 7 days
     rate_limit_delay_seconds: int = Field(default=60)
     max_requests_per_session: int = Field(default=100)
+    
+    # Scheduler Settings
+    collection_hour: int = Field(default=8)
+    report_day: str = Field(default="sun")
+    report_hour: int = Field(default=10)
     
     # Application Settings
     app_name: str = Field(default="XGrivanceMon")

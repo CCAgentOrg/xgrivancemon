@@ -5,9 +5,8 @@ Uses stored session cookies for X web scraping (not API)
 
 import requests
 import time
-import json
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from typing import List, Dict, Union
 
 class XCollector:
     def __init__(self, auth_token: str, csrf_token: str):
@@ -28,7 +27,7 @@ class XCollector:
         
         try:
             search_url = f"{self.base_url}/2/search/adaptive.json"
-            params = {
+            params: Dict[str, Union[str, int]] = {
                 "q": query,
                 "count": 100,
                 "result_type": "recent",

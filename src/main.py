@@ -3,11 +3,10 @@
 XGrivanceMon - Main Application with Dashboard
 """
 import os
-import asyncio
 from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
@@ -26,13 +25,12 @@ settings = Settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
-    app.state.db = Database(settings.turso_url, settings.turso_token)
+    app.state.db = Database(settings.turso_database_url, settings.turso_auth_token)
     await app.state.db.initialize()
     
     app.state.collector = XCollector(
-        api_key=settings.x_api_key,
-        api_secret=settings.x_api_secret,
-        cookie_session=settings.x_cookie_session
+        auth_token=settings.x_auth_token,
+        csrf_token=settings.x_csrf_token
     )
     app.state.analyzer = GrievanceAnalyzer()
     app.state.reporter = ReportGenerator()
