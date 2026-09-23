@@ -20,30 +20,40 @@ class GrievanceAnalyzer:
         text_lower = text.lower()
         
         # Category detection
-        category_scores = {}
+        category_scores: Dict[str, int] = {}
         for cat, keywords in self.CATEGORIES.items():
             score = sum(1 for kw in keywords if kw in text_lower)
             if score > 0:
                 category_scores[cat] = score
         
-        category = max(category_scores, key=category_scores.get) if category_scores else 'other'
+        category = max(category_scores, key=lambda k: category_scores[k]) if category_scores else "other"
         
         # Sentiment analysis (simple keyword-based)
         positive_count = sum(1 for word in self.POSITIVE_WORDS if word in text_lower)
         negative_count = sum(1 for word in self.NEGATIVE_WORDS if word in text_lower)
         
         if positive_count > negative_count:
-            sentiment = 0.5
+            sentiment = min(0.5 + 0.1 * positive_count, 1.0)
         elif negative_count > positive_count:
-            sentiment = -0.5
+            sentiment = max(-0.5 - 0.1 * negative_count, -1.0)
         else:
-            sentiment = 0
+            sentiment = 0.0
         
         return category, sentiment
     
-    def analyze_complaint(self, complaint: Dict) -> Dict:
-        """Analyze a single complaint"""
-        category, sentiment = self.classify(complaint['content'])
-        complaint['category'] = category
-        complaint['sentiment'] = sentiment
-        return complaint
+    def analyze_batch(self, complaints: list) -> Dict:
+        """Analyze a batch of complaints"""
+        results = []
+        for complaint in complaints:
+            category, sentiment = self.classify(complaint.get('content', ''))
+            results.append({
+                'id': complaint.get('id'),
+                'category': category,
+                'sentiment': sentiment
+            })
+        
+        return {
+            'analyzed': len(results),
+            'results': results,
+            'categories': list(self.CATEGORIES.keys()) + ['other']
+        }

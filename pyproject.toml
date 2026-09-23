@@ -3,7 +3,7 @@ python_version = "3.11"
 warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
-module = ["libsql_client.*", "apscheduler.*"]
+module = ["apscheduler.*", "libsql_client.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
