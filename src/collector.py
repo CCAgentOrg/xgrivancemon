@@ -5,9 +5,8 @@ Uses stored session cookies for X web scraping (not API)
 
 import requests
 import time
-import json
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 class XCollector:
     def __init__(self, auth_token: str, csrf_token: str):

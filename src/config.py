@@ -1,7 +1,6 @@
 """Configuration settings using Pydantic"""
 from pydantic import Field
 from pydantic_settings import BaseSettings
-from typing import List, Optional
 
 class Settings(BaseSettings):
     # TursoDB Configuration

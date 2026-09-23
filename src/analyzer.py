@@ -1,5 +1,4 @@
 """Grievance classification and sentiment analysis"""
-import re
 from typing import Dict, Tuple
 
 class GrievanceAnalyzer:
